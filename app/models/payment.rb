@@ -1,7 +1,7 @@
 class Payment < ApplicationRecord
   belongs_to :bill
   belongs_to :payment_method
-  before_save :complete_payment
+  # before_save :complete_payment
 
   INITIATED = 0
   SUCCESS = 1
@@ -26,10 +26,6 @@ class Payment < ApplicationRecord
       adjustment_balance: bill.creator.adjustment_balance - adjustment_amount
     )
     bill.update(payment_status: Bill::PAID)
-  end
-
-  after_save do
-    puts 'Payment entry created.'
   end
 
   def create_payment(bill)

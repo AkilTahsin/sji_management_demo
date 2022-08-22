@@ -2,7 +2,7 @@ class Bill < ApplicationRecord
   belongs_to :creator, class_name: 'User', foreign_key: :creator_id
   has_many :payments, dependent: :destroy
   has_many :adjustments, dependent: :destroy
-  after_validation :set_total_cost
+  after_initialize :set_total_cost
   after_create :set_payment
 
   validates :liters_taken, :unit_cost, numericality: { greater_than_or_equal_to: 0.01 }
@@ -24,7 +24,7 @@ class Bill < ApplicationRecord
   def set_payment
     if !self.PayLater?
       # update_column(payment_status, UNPAID)
-      adjustment_amount = if creator.adjustment_balance >= total_cost
+      adjustment_amount = if creator.adjustment_balance >= self.total_cost
                             self.total_cost
                           else
                             self.creator.adjustment_balance
@@ -35,7 +35,8 @@ class Bill < ApplicationRecord
         bill_amount: self.total_cost,
         adjustment_amount: adjustment_amount,
         total_amount: self.total_cost - adjustment_amount,
-        status: Payment::INITIATED
+        status: Payment::INITIATED,
+        payment_method_id: 1
       )
     elsif self.PayLater? && adjustments.LaterPayment.count.eql?(0)
       adjustments.create(
