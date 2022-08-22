@@ -1,12 +1,15 @@
 class Bill < ApplicationRecord
   belongs_to :user
+  has_many :payments
+  has_many :adjustments
 
-  # Integers [0,1,2] represents different states of payment via enum
   enum payment_status: {
     "Pay Later" => 0,
     "Unpaid" => 1,
     "Paid" => 2
   }
+
+  validates :liters_taken, :unit_cost, numericality: {greater_than_or_equal_to: 0.01}
 
   def total_cost
     total_cost = liters_taken * unit_cost

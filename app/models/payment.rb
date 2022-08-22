@@ -20,4 +20,7 @@ class Payment < ApplicationRecord
 
   validates :bill_amount, :adjustment_amount, :total_amount, :status, presence: true
   validates :status, inclusion: status.keys
+
+  validates :status, numericality: {in: 0..2}
+
 end
