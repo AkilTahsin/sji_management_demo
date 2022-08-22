@@ -1,7 +1,7 @@
 class PaymentMethod < ApplicationRecord
-  before_save :check_payment_type
   belongs_to :user  
-  has_many :payments
+  has_many :payments, dependent: :destroy
+  before_save :check_payment_type
   
   enum payment_type: {
     card: 1,
@@ -24,6 +24,6 @@ class PaymentMethod < ApplicationRecord
       errors.add(:payment_type, "invalid.")
       raise ActiveRecord::RecordInvalid.new(self)
     end
-
   end
+  
 end
