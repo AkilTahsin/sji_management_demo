@@ -2,13 +2,26 @@ class Adjustment < ApplicationRecord
   belongs_to :bill
   belongs_to :user
 
-  # Integers [0,1,2] represents pending adjustment type
-  enum adjustment_type{
-    "Pay Later" => 0,
-    "Refund" => 1,
-    "Extra Charge" => 2
+  LATERPAYMENT = 0
+  REFUND = 1
+  EXTRACHARGE = 2
+
+  before_create :set_user
+  after_create :adjust_user_amount
+  def set_user
+    self.user_id = self.bill.creator_id
+  end
+  def adjust_user_amount
+    self.user.update(adjustment_balance: self.user.adjustment_balance + self.amount)
+  end
+
+  enum adjustment_type: {
+    LaterPayment: LATERPAYMENT,
+    Refund: REFUND,
+    ExtraCharge: EXTRACHARGE
   }
-  
-  validates :amount, :adjustment_type, presence: true
-  validates :adjustment_type, inclusion: adjustment_type.keys
+
+  scope :refunds, -> { where(adjustment_type: REFUND) }
+  scope :pay_later, -> { where(adjustment_type: PAYLATER) }
+
 end

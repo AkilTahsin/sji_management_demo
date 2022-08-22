@@ -23,7 +23,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_21_120015) do
   end
 
   create_table "bills", force: :cascade do |t|
-    t.integer "user_id", null: false
+    t.integer "creator_id"
     t.text "title"
     t.integer "liters_taken"
     t.integer "unit_cost"
@@ -31,7 +31,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_21_120015) do
     t.integer "payment_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_bills_on_user_id"
   end
 
   create_table "payment_methods", force: :cascade do |t|
@@ -69,7 +68,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_21_120015) do
 
   add_foreign_key "adjustments", "bills"
   add_foreign_key "adjustments", "users"
-  add_foreign_key "bills", "users"
   add_foreign_key "payment_methods", "users"
   add_foreign_key "payments", "bills"
   add_foreign_key "payments", "payment_methods"

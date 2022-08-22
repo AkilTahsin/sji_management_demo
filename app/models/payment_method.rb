@@ -15,15 +15,17 @@ class PaymentMethod < ApplicationRecord
   def check_payment_type
     if self.card?
       errors.add(:card, "fields cannot be empty.")
-      raise ActiveRecord::RecordInvalid.new(self)
+      self.errors[:base] << "This person is invalid because of incomplete card information"
 
     elsif self.bank?
-      errors.add(:card, "fields cannot be empty.")
-      raise ActiveRecord::RecordInvalid.new(self)
+      errors.add(:bank, "fields cannot be empty.")
+      self.errors[:base] << "This person is invalid because of incomplete bank information"
     else
       errors.add(:payment_type, "invalid.")
-      raise ActiveRecord::RecordInvalid.new(self)
+      self.errors[:base] << "This person is invalid because of unknown payment information"
     end
   end
+
+  
   
 end
