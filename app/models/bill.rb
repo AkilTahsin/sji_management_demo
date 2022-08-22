@@ -2,10 +2,10 @@ class Bill < ApplicationRecord
   belongs_to :creator, class_name: 'User', foreign_key: :creator_id
   has_many :payments, dependent: :destroy
   has_many :adjustments, dependent: :destroy
-
+  after_validation :set_total_cost
   after_create :set_payment
 
-  validates :liters_taken, :unit_cost, numericality: {greater_than_or_equal_to: 0.01}
+  validates :liters_taken, :unit_cost, numericality: { greater_than_or_equal_to: 0.01 }
 
   PAYLATER = 0
   UNPAID = 1
@@ -17,30 +17,31 @@ class Bill < ApplicationRecord
     Paid: PAID
   }
 
-  def set_payment
+  def set_total_cost
     self.total_cost = self.liters_taken * self.unit_cost
-    self.save
-    if !self.PayLater?
-      self.update(payment_status: UNPAID)
-      bill_amount = self.total_cost
-      adjust_amount = if self.creator.adjustment_balance >= bill_amount
-        bill_amount
-                      else
-                        self.creator.adjustment_balance
-                      end
+  end
 
+  def set_payment
+    if !self.PayLater?
+      # update_column(payment_status, UNPAID)
+      adjustment_amount = if creator.adjustment_balance >= total_cost
+                            self.total_cost
+                          else
+                            self.creator.adjustment_balance
+                          end
+
+      # puts adjustment_amount
       self.payments.create(
-        bill_amount: bill_amount,
-        adjustment_amount: adjust_amount,
-        total_amount: bill_amount - adjust_amount,
+        bill_amount: self.total_cost,
+        adjustment_amount: adjustment_amount,
+        total_amount: self.total_cost - adjustment_amount,
         status: Payment::INITIATED
       )
-
-    elsif self.PayLater? && self.adjustments.LaterPayment.count.eql?(0)
-      self.adjustments.create(
-        user_id: self.creator_id,
+    elsif self.PayLater? && adjustments.LaterPayment.count.eql?(0)
+      adjustments.create(
+        user_id: creator_id,
         adjustment_type: Adjustment::LATERPAYMENT,
-        amount: self.total_cost
+        amount: total_cost
       )
     end
   end

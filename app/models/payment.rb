@@ -13,23 +13,38 @@ class Payment < ApplicationRecord
     Failed: FAILED
   }
 
-  # validates :bill_amount, :adjustment_amount, :total_amount, :status, presence: true
+  validates :bill_amount, :adjustment_amount, :total_amount, :status, presence: true
   # validates :status, inclusion: status.keys
   # validates :status, numericality: {in: 0..2}
 
   def complete_payment
-    self.update(
+    update(
       status: Payment::SUCCESS,
-      total_amount: self.bill_amount + self.adjustment_amount
+      total_amount: bill_amount + adjustment_amount
     )
-    self.bill.creator.update(
-      adjustment_balance: self.bill.creator.adjustment_balance - self.adjustment_amount
+    bill.creator.update(
+      adjustment_balance: bill.creator.adjustment_balance - adjustment_amount
     )
-    self.bill.update(payment_status: Bill::PAID)
+    bill.update(payment_status: Bill::PAID)
   end
-  
+
   after_save do
-    puts "Payment entry created."
+    puts 'Payment entry created.'
+  end
+
+  def create_payment(bill)
+    adjustment_amount = if creator.adjustment_balance >= total_cost
+                          bill.total_cost
+                        else
+                          bill.creator.adjustment_balance
+                        end
+
+    # puts adjustment_amount
+    bill.payments.create(
+      adjustment_amount: adjustment_amount,
+      total_amount: bill.bill_amount - adjustment_amount,
+      status: Payment::INITIATED
+    )
   end
 
 end
