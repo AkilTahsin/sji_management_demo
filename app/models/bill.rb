@@ -15,7 +15,7 @@ class Bill < ApplicationRecord
     unpaid: 1,
     paid: 2
   }
-  
+
   validates :liters_taken, :unit_cost, numericality: {greater_than_or_equal_to: 0.01}
 
   def add_total_cost
@@ -25,7 +25,7 @@ class Bill < ApplicationRecord
   def pay_when()
     if !self.pay_later?
       # puts self.payment_status
-      # Payment.new(bill_id: self.id, bill_amount: self.total_cost, adjustment_amount: Adjustment[:user_id].amount, status: 'Initiated')
+      Payment.new(bill_id: self.id, bill_amount: self.total_cost, adjustment_amount: Adjustment[:user_id].amount, status: 'Initiated')
 
     end
   end

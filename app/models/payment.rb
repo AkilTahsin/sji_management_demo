@@ -9,9 +9,7 @@ class Payment < ApplicationRecord
       set_adjustment_amount()
       self.adjustment_amount = self.bill_amount + self.adjustment_amount
     end
-    user_id = Bill.user_id
-    user = User[:user_id]
-    
+
   end
   
   after_save do
