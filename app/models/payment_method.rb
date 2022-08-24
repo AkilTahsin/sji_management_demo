@@ -8,8 +8,6 @@ class PaymentMethod < ApplicationRecord
     bank: 2
   }
 
-  validates :is_default, :payment_type, presence: true
-
   validates :payment_type, inclusion: payment_types.keys
 
   def check_payment_type
@@ -25,7 +23,4 @@ class PaymentMethod < ApplicationRecord
       self.errors[:base] << "This person is invalid because of unknown payment information"
     end
   end
-
-  
-  
 end

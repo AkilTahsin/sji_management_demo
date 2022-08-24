@@ -5,8 +5,8 @@ class CreatePayments < ActiveRecord::Migration[7.0]
       t.integer :bill_amount
       t.integer :adjustment_amount
       t.integer :total_amount
-      t.integer :status
-      t.references :payment_method, null: false, foreign_key: true
+      t.string :status
+      t.references :payment_method, null: true, foreign_key: true
 
       t.timestamps
     end

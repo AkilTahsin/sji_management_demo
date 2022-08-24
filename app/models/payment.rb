@@ -1,46 +1,44 @@
 class Payment < ApplicationRecord
   belongs_to :bill
-  belongs_to :payment_method
-  # before_save :complete_payment
+  belongs_to :payment_method, optional: true
 
-  INITIATED = 0
-  SUCCESS = 1
-  FAILED = 2
+  INITIATED = 'initiated'
+  PENDING = 'pending'
+  SUCCESS = 'successful'
+  FAILED = 'failed'
 
   enum status: {
-    Initiated: INITIATED,
-    Successful: SUCCESS,
-    Failed: FAILED
+    initiated: INITIATED,
+    pending: PENDING,
+    successful: SUCCESS,
+    failed: FAILED
   }
 
   validates :bill_amount, :adjustment_amount, :total_amount, :status, presence: true
-  # validates :status, inclusion: status.keys
-  # validates :status, numericality: {in: 0..2}
+  
+  def initiate_payment(bill_total_cost, bill_adjustment_amount, _status, bill_payment_method_by_id)
+    self.bill_amount = bill_total_cost
+    self.adjustment_amount = bill_adjustment_amount
+    self.total_amount = self.bill_amount - self.adjustment_amount
+    self.status = _status
+    self.payment_method_id = bill_payment_method_by_id
 
-  def complete_payment
+    self.save!
+
+    self.update(status: 'pending')
+  end
+
+  def complete_payment(_status)
     update(
-      status: Payment::SUCCESS,
+      status: _status,
       total_amount: bill_amount + adjustment_amount
     )
-    bill.creator.update(
-      adjustment_balance: bill.creator.adjustment_balance - adjustment_amount
+    bill.user.update(
+      adjustment_balance: bill.user.adjustment_balance - adjustment_amount
     )
-    bill.update(payment_status: Bill::PAID)
+
+    if _status.eql? 'successful'
+      bill.update(payment_status: Bill::PAID)
+    end
   end
-
-  def create_payment(bill)
-    adjustment_amount = if creator.adjustment_balance >= total_cost
-                          bill.total_cost
-                        else
-                          bill.creator.adjustment_balance
-                        end
-
-    # puts adjustment_amount
-    bill.payments.create(
-      adjustment_amount: adjustment_amount,
-      total_amount: bill.bill_amount - adjustment_amount,
-      status: Payment::INITIATED
-    )
-  end
-
 end

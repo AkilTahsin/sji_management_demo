@@ -23,19 +23,20 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_21_120015) do
   end
 
   create_table "bills", force: :cascade do |t|
-    t.integer "creator_id"
+    t.integer "user_id"
     t.text "title"
     t.integer "liters_taken"
     t.integer "unit_cost"
     t.integer "total_cost"
-    t.integer "payment_status"
+    t.integer "payment_status", default: 0
+    t.string "payment_type", default: "paylater"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "payment_methods", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.boolean "is_default"
+    t.boolean "is_default", default: false
     t.integer "payment_type"
     t.integer "card_number"
     t.text "card_details"
@@ -51,8 +52,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_21_120015) do
     t.integer "bill_amount"
     t.integer "adjustment_amount"
     t.integer "total_amount"
-    t.integer "status"
-    t.integer "payment_method_id", null: false
+    t.string "status"
+    t.integer "payment_method_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["bill_id"], name: "index_payments_on_bill_id"

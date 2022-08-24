@@ -6,11 +6,8 @@ class Adjustment < ApplicationRecord
   REFUND = 1
   EXTRACHARGE = 2
 
-  before_create :set_user
-  after_create :adjust_user_amount
-  def set_user
-    self.user_id = self.bill.creator_id
-  end
+  before_save :adjust_user_amount
+
   def adjust_user_amount
     self.user.update(adjustment_balance: self.user.adjustment_balance + self.amount)
   end
