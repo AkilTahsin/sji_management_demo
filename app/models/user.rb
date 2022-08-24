@@ -9,7 +9,7 @@ class User < ApplicationRecord
     self.payment_methods.find_by(is_default: :true)
   end
 
-  def get_payment_method_id(type)
-        self.payment_methods.find_by(payment_type: type).id
+  def payment_method_by_type(type)
+    self.payment_methods.find_by(payment_type: type)
   end
 end

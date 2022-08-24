@@ -34,29 +34,38 @@ class Bill < ApplicationRecord
     self.payment_status = UNPAID
     payment_entry = self.payments.new
     
-    if self.payment_type.eql? 'paylater'                   # Process Pay-Later request
+    if self.payment_type.eql? 'paylater'
+      # Process Pay-Later request
       self.pay_later(payment_entry)
-
-    else                                                   # Process Pay-Now request
+    else
+      # Process Pay-Now request
       self.pay_now(payment_entry)
     end
   end
 
   def pay_now(payment_entry)
     payment_entry.initiate_payment(
-      total_cost,                                          # Payment.bill_amount
-      self.get_adjustment_amount,                          # Payment.adjustment_amount
-      'initiated',                                         # Payment.status
-      self.user.get_payment_method_id(self.payment_type)   # Payment.payment_method_id
+      total_cost,
+      # Payment.bill_amount
+      self.get_adjustment_amount,
+      # Payment.adjustment_amount
+      'initiated',
+      # Payment.status
+      self.user.payment_method_by_type(self.payment_type).id
+      # Payment.payment_method_id
     )
-    end
+  end
 
   def pay_later(payment_entry)
     payment_entry.initiate_payment(
-      total_cost,                                          # Payment.bill_amount
-      self.get_adjustment_amount(),                        # Payment.adjustment_amount
-      'initiated',                                         # Payment.status
-      nil                                                  # Payment.payment_method_id
+      total_cost,
+      # Payment.bill_amount
+      self.get_adjustment_amount(),
+      # Payment.adjustment_amount
+      'initiated',
+      # Payment.status
+      self.user.default_payment_method.id
+      # Payment.payment_method_id
     )
     payment_entry.complete_payment(Payment::SUCCESS)
 

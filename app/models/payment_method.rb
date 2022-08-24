@@ -11,16 +11,13 @@ class PaymentMethod < ApplicationRecord
   validates :payment_type, inclusion: payment_types.keys
 
   def check_payment_type
-    if self.card?
-      errors.add(:card, "fields cannot be empty.")
-      self.errors[:base] << "This person is invalid because of incomplete card information"
-
-    elsif self.bank?
-      errors.add(:bank, "fields cannot be empty.")
-      self.errors[:base] << "This person is invalid because of incomplete bank information"
-    else
-      errors.add(:payment_type, "invalid.")
-      self.errors[:base] << "This person is invalid because of unknown payment information"
+    if self.payment_type.eql? 'card' and (!self.card_details? and !self.card_number?)
+      errors.add(:payment_type, " fields cannot be empty.")
+      raise ActiveRecord::RecordInvalid.new(self)
+    
+    elsif self.payment_type.eql? 'bank' and (!self.bank_details? and !self.bank_account?)
+      errors.add(:payment_type, " fields cannot be empty.")
+      raise ActiveRecord::RecordInvalid.new(self)
     end
   end
 end
