@@ -40,7 +40,6 @@ class Bill < ApplicationRecord
     else                                                   # Process Pay-Now request
       self.pay_now(payment_entry)
     end
-    
   end
 
   def pay_now(payment_entry)
@@ -50,10 +49,7 @@ class Bill < ApplicationRecord
       'initiated',                                         # Payment.status
       self.user.get_payment_method_id(self.payment_type)   # Payment.payment_method_id
     )
-
-    # payment_entry.complete_payment(Payment::SUCCESS)     # Payment-authentication
-    self.payment_status = Bill::PAID
-  end
+    end
 
   def pay_later(payment_entry)
     payment_entry.initiate_payment(
